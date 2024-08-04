@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Product</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      padding-top: 56px; /* Adjust based on navbar height */
+    }
+    .product-grid-item {
+      border: 1px solid #ddd;
+      margin-bottom: 20px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .product-grid-item img {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <a class="navbar-brand" href="/">My Website</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <!-- <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Categories
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="/categories/add">Add Category</a>
+          </div>
+        </li> -->
+        <li class="nav-item">
+          <a class="nav-link" href="/products">Products</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <div class="container mt-4">
+    <h1>Products</h1>
+    <a href="/products/add" class="btn btn-primary mb-3">Add Product</a>
+    <% categories.forEach(category => { %>
+      <h2><%= category.name %></h2>
+      <ul class="list-group">
+        <% products[category._id].forEach(product => { %>
+          <li class="list-group-item">
+            <h5><%= product.name %></h5> 
+            <% if (product.image) { %>
+              <img src="/uploads/<%= product.image %>" alt="Product Image" style="width:100px;height:auto;">
+            <% } %>
+            <p><%= product.description %></p>
+            <p>Price: $<%= product.price %></p>
+            <a href="#" class="btn btn-info btn-sm float-right ml-2" data-toggle="modal" data-target="#editProductModal"
+               data-id="<%= product._id %>" data-name="<%= product.name %>" data-description="<%= product.description %>"
+               data-price="<%= product.price %>" data-category="<%= product.categoryId._id %>" data-image="<%= product.image %>">Edit</a>
+            <form action="/products/delete/<%= product._id %>" method="POST" class="float-right">
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          </li>
+        <% }); %>
+      </ul>
+    <% }); %>
+  </div>
+
+   
+   
+
+  <!-- Modal for Editing Product -->
+  <div class="modal fade" id="editProductModal" tabindex="-1" role="dialog" aria-labelledby="editProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editProductModalLabel">Edit Product</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="editProductForm" action="/products/edit" method="POST" enctype="multipart/form-data">
+            <input type="hidden" id="editProductId" name="id">
+            <div class="form-group">
+              <label for="editProductCategory">Category</label>
+              <select class="form-control" id="editProductCategory" name="categoryId" required>
+                <% categories.forEach(category => { %>
+                  <option value="<%= category._id %>"><%= category.name %></option>
+                <% }); %>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="editProductName">Item Name</label>
+              <input type="text" class="form-control" id="editProductName" name="name" required>
+            </div>
+            <div class="form-group">
+              <label for="editProductImage">Image</label>
+              <input type="file" class="form-control" id="editProductImage" name="image" accept="image/*" capture="camera">
+            </div>
+            <div class="form-group">
+              <label for="editProductDescription">Description</label>
+              <textarea class="form-control" id="editProductDescription" name="description" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="editProductPrice">Price</label>
+              <input type="number" class="form-control" id="editProductPrice" name="price" step="0.01" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    $('#editProductModal').on('show.bs.modal', function (event) {
+      var button = $(event.relatedTarget);
+      var id = button.data('id');
+      var name = button.data('name');
+      var description = button.data('description');
+      var price = button.data('price');
+      var category = button.data('category');
+      var image = button.data('image');
+
+      var modal = $(this);
+      modal.find('#editProductId').val(id);
+      modal.find('#editProductName').val(name);
+      modal.find('#editProductDescription').val(description);
+      modal.find('#editProductPrice').val(price);
+      modal.find('#editProductCategory').val(category);
+      // No need to set image in modal, as it's a file input and it won't set value programmatically
+    });
+  </script>
+</body>
+</html>
